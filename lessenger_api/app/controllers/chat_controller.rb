@@ -1,4 +1,29 @@
 class ChatController < ApplicationController
+    # the query set to check text input with
+    $QUERIES = [
+        "what's the weather in",
+        "weather in",
+        "weather"
+    ]
+
+    # the URL of icons used with the Dark Sky api
+    # Icon attribution: https://www.flaticon.com/authors/smashicons & https://www.flaticon.com/authors/freepik
+    $WEATHER = {
+        'clear-day' => 'https://image.flaticon.com/icons/svg/136/136723.svg',
+        'clear-night' => 'https://image.flaticon.com/icons/svg/414/414942.svg',
+        'rain' => 'https://image.flaticon.com/icons/svg/578/578339.svg',
+        'snow' => 'https://image.flaticon.com/icons/svg/275/275722.svg',
+        'sleet' => 'https://image.flaticon.com/icons/svg/136/136711.svg',
+        'wind' => 'https://image.flaticon.com/icons/svg/136/136712.svg',
+        'fog' => 'https://image.flaticon.com/icons/svg/414/414927.svg',
+        'cloudy'=> 'https://image.flaticon.com/icons/svg/136/136701.svg',
+        'partly-cloudy-day' => 'https://image.flaticon.com/icons/svg/136/136716.svg',
+        'partly-cloudy-night' => 'https://image.flaticon.com/icons/svg/136/136719.svg',
+        'hail' => 'https://image.flaticon.com/icons/svg/290/290428.svg',
+        'thunderstorm' => 'https://image.flaticon.com/icons/svg/136/136729.svg',
+        'tornado' => 'https://image.flaticon.com/icons/svg/284/284431.svg'
+    }
+
     # used to get the coordinates and name of a location passed in using the Google Maps API
     # called from messages
     # @param location [String] the name of the location the user asked for
@@ -28,37 +53,16 @@ class ChatController < ApplicationController
     # @param icon [String] the icon name passed in from darksky. Must be one of the accepted icons from the API
     # @output [String] returns a url for the icon
     def icon(icon)
-        weather = {
-            'clear-day' => 'https://image.flaticon.com/icons/svg/136/136723.svg',
-            'clear-night' => 'https://image.flaticon.com/icons/svg/414/414942.svg',
-            'rain' => 'https://image.flaticon.com/icons/svg/578/578339.svg',
-            'snow' => 'https://image.flaticon.com/icons/svg/275/275722.svg',
-            'sleet' => 'https://image.flaticon.com/icons/svg/136/136711.svg',
-            'wind' => 'https://image.flaticon.com/icons/svg/136/136712.svg',
-            'fog' => 'https://image.flaticon.com/icons/svg/414/414927.svg',
-            'cloudy'=> 'https://image.flaticon.com/icons/svg/136/136701.svg',
-            'partly-cloudy-day' => 'https://image.flaticon.com/icons/svg/136/136716.svg',
-            'partly-cloudy-night' => 'https://image.flaticon.com/icons/svg/136/136719.svg',
-            'hail' => 'https://image.flaticon.com/icons/svg/290/290428.svg',
-            'thunderstorm' => 'https://image.flaticon.com/icons/svg/136/136729.svg',
-            'tornado' => 'https://image.flaticon.com/icons/svg/284/284431.svg'
-        }
-        return weather[icon]
+        return $WEATHER[icon]
     end
 
     # the main function to handle input
     # params are already passed in automatically
     # @output [Hash] the reply, following the lessenger API
     def messages()
-        queries = [
-            "what's the weather in",
-            "weather in",
-            "weather"
-        ]
         user = params[:user_id]
         messages = []
         if params[:name]
-            # @users[user] = params[:name]
             messages << {type: 'text', text: "Hello, #{params[:name]}!"}
             messages << {type: 'rich', html: "<img src='https://m.popkey.co/b02639/pDgKO.gif'>"}
         end
@@ -66,7 +70,7 @@ class ChatController < ApplicationController
             msg = params[:text]
             reply = "<i>#{msg}</i>" # parrot back what you say unless you're asking about weather
             location = ""
-            queries.each_with_index do |q, ind|
+            $QUERIES.each_with_index do |q, ind|
                 next unless location == ""
                 if msg.include?(q)
                     parse = msg.split(q).each{|phrase| phrase.strip}
