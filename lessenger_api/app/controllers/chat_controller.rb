@@ -1,8 +1,6 @@
 class ChatController < ApplicationController
     # @users = {}
     def messages()
-        puts "#{params}".red
-
         queries = [
             "what's the weather in",
             "weather in",
@@ -21,18 +19,23 @@ class ChatController < ApplicationController
                 next unless location == ""
                 if msg.include?(q)
                     parse = msg.split(q).each{|phrase| phrase.strip}
-                    puts "#{parse}".yellow
-                    # if ind == 3
-                    #     location = parse[-1]
-                    # else
                     location = parse[-1]
-                    # end
-                    reply = location
-                    puts "#{reply}".green
+                    # grab coordinates
+                    map_res = HTTParty.get("https://maps.googleapis.com/maps/api/geocode/json?address=#{location}&key=AIzaSyD7W7v5psM8TDJwUV2WxsPkoYRtByh07Y0")
+                    map = JSON.parse(map_res.body)
+                    loc = map['results'][0]['geometry']['location']
+                    city = map['results'][0]['formatted_address']
+                    # grab weather
+                    weather_res = HTTParty.get("https://api.darksky.net/forecast/8b4d5ca925446f9db4f7d7d0aac8b40c/#{loc['lat']},#{loc['lng']}")
+                    weather = JSON.parse(weather_res.body)
+                    # write out the response
+                    reply = "Currently, the weather in #{city} is #{weather['currently']['summary'].downcase}, with a temperature of #{weather['currently']['temperature']}°F (feeling like #{weather['currently']['apparentTemperature']}°F). There is a #{weather['currently']['precipProbability'].to_f*100}% chance of rain.<BR><BR>
+                    Today, expect #{weather['hourly']['summary'].downcase}<BR>
+                    Over the week, expect #{weather['daily']['summary']}<BR><BR>
+                    Have a good day!"
                 end
             end
-            puts "#{reply}".magenta
-            m = {type: 'text', text: reply}
+            m = {type: 'rich', html: reply}
         end
         messages = [m]
         render json: {
