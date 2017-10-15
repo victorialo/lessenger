@@ -1,5 +1,25 @@
 class ChatController < ApplicationController
     # @users = {}
+
+    def icon(icon)
+        weather = {
+            'clear-day' => 'https://image.flaticon.com/icons/svg/136/136723.svg',
+            'clear-night' => 'https://image.flaticon.com/icons/svg/414/414942.svg',
+            'rain' => 'https://image.flaticon.com/icons/svg/578/578339.svg',
+            'snow' => 'https://image.flaticon.com/icons/svg/275/275722.svg',
+            'sleet' => 'https://image.flaticon.com/icons/svg/136/136711.svg',
+            'wind' => 'https://image.flaticon.com/icons/svg/136/136712.svg',
+            'fog' => 'https://image.flaticon.com/icons/svg/414/414927.svg',
+            'cloudy'=> 'https://image.flaticon.com/icons/svg/136/136701.svg',
+            'partly-cloudy-day' => 'https://image.flaticon.com/icons/svg/136/136716.svg',
+            'partly-cloudy-night' => 'https://image.flaticon.com/icons/svg/136/136719.svg',
+            'hail' => 'https://image.flaticon.com/icons/svg/290/290428.svg',
+            'thunderstorm' => 'https://image.flaticon.com/icons/svg/136/136729.svg',
+            'tornado' => 'https://image.flaticon.com/icons/svg/284/284431.svg'
+        }
+        return weather[icon]
+    end
+
     def messages()
         queries = [
             "what's the weather in",
@@ -7,13 +27,14 @@ class ChatController < ApplicationController
             "weather"
         ]
         user = params[:user_id]
+        messages = []
         if params[:name]
             # @users[user] = params[:name]
             m = {type: 'text', text: "Hello, #{params[:name]}!"}
         end
         if params[:text]
             msg = params[:text]
-            reply = msg # parrot back what you say unless you're asking about weather
+            reply = "<i>#{msg}</i>" # parrot back what you say unless you're asking about weather
             location = ""
             queries.each_with_index do |q, ind|
                 next unless location == ""
@@ -33,15 +54,19 @@ class ChatController < ApplicationController
                     weather_res = HTTParty.get("https://api.darksky.net/forecast/8b4d5ca925446f9db4f7d7d0aac8b40c/#{loc['lat']},#{loc['lng']}")
                     weather = JSON.parse(weather_res.body)
                     # write out the response
-                    reply = "Currently, the weather in #{city} is #{weather['currently']['summary'].downcase}, with a temperature of #{weather['currently']['temperature']}°F (feeling like #{weather['currently']['apparentTemperature']}°F). There is a #{weather['currently']['precipProbability'].to_f*100}% chance of rain.<BR><BR>
-                    Today, expect #{weather['hourly']['summary'].downcase}<BR>
-                    Over the week, expect #{weather['daily']['summary']}<BR><BR>
+                    messages << {
+                        type: 'rich',
+                        html: "<iframe src='#{icon(weather['currently']['icon'])}'></iframe>"
+                    }
+                    reply = "Currently, the weather in <b>#{city}</b> is <i>#{weather['currently']['summary'].downcase}</i>, with a temperature of #{weather['currently']['temperature']}°F (feeling like #{weather['currently']['apparentTemperature']}°F). There is a #{weather['currently']['precipProbability'].to_f*100}% chance of rain.<BR><BR>
+                    Today, expect <i>#{weather['hourly']['summary'].downcase}</i><BR>
+                    Over the week, expect <i>#{weather['daily']['summary'].camelize(:lower)}</i><BR><BR>
                     Have a good day!"
                 end
             end
             m = {type: 'rich', html: reply}
         end
-        messages = [m]
+        messages << m
         render json: {
             success: 'success',
             messages: messages
