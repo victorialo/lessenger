@@ -1,24 +1,21 @@
-# README
+# Lessenger
+Hipmunk weather chatbot
+By: Victoria Lo
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+##Features
+* Named greeting with gif
+* Fancy images to correlate with the weather
+* Will accept any reasonable request with the word `weather` or `weather in`
+* Simple summary for the rest of the week as well
+* Whatever else you say to it, it will repeat back to you
 
-Things you may want to cover:
+##To start up server:
+* `bundle install` (if you haven't already)
+* `rails s -p 9000`
+* Go to the client and chat away!
 
-* Ruby version
+##To use (client):
+Visit `http://hipmunk.github.io/hipproblems/lessenger/` on your browser.
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+##Notes
+The majority of the relevant code is in `app/controllers/chat_controller.rb`.

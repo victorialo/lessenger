@@ -1,6 +1,7 @@
 class ChatController < ApplicationController
-    # @users = {}
-
+    # used to get images for the icons passed in by darksky
+    # @param icon [String] the icon name passed in from darksky. Must be one of the accepted icons from the API
+    # @output [String] returns a url for the icon
     def icon(icon)
         weather = {
             'clear-day' => 'https://image.flaticon.com/icons/svg/136/136723.svg',
@@ -20,6 +21,9 @@ class ChatController < ApplicationController
         return weather[icon]
     end
 
+    # the main function to handle input
+    # params are already passed in automatically
+    # @output [Hash] the reply, following the lessenger API
     def messages()
         queries = [
             "what's the weather in",
@@ -30,7 +34,9 @@ class ChatController < ApplicationController
         messages = []
         if params[:name]
             # @users[user] = params[:name]
-            m = {type: 'text', text: "Hello, #{params[:name]}!"}
+            messages << {type: 'text', text: "Hello, #{params[:name]}!"}
+            messages << {type: 'rich', html: "<img src='https://m.popkey.co/b02639/pDgKO.gif'>"}
+            puts "#{messages}".green
         end
         if params[:text]
             msg = params[:text]
@@ -64,9 +70,8 @@ class ChatController < ApplicationController
                     Have a good day!"
                 end
             end
-            m = {type: 'rich', html: reply}
+            messages << {type: 'rich', html: reply}
         end
-        messages << m
         render json: {
             success: 'success',
             messages: messages
