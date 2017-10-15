@@ -23,6 +23,10 @@ class ChatController < ApplicationController
                     # grab coordinates
                     map_res = HTTParty.get("https://maps.googleapis.com/maps/api/geocode/json?address=#{location}&key=AIzaSyD7W7v5psM8TDJwUV2WxsPkoYRtByh07Y0")
                     map = JSON.parse(map_res.body)
+                    if map_res['results'].empty?
+                        reply = "Sorry, that location (#{location}) doesn't seem to exist. Try again?"
+                        next
+                    end
                     loc = map['results'][0]['geometry']['location']
                     city = map['results'][0]['formatted_address']
                     # grab weather
